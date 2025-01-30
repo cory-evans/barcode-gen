@@ -1,0 +1,10 @@
+node_modules/
+tmp/
+
+# currently, styles.css is generated and htmx.min.js is downloaded from a CDN
+assets/
+
+# These are generated files
+*_templ.go
+
+

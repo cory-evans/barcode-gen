@@ -1,0 +1,18 @@
+package templates
+
+templ Barcode(barcodes []string, barcodeType string, width, height string) {
+	<ul class="flex flex-wrap">
+		for _, barcode := range barcodes {
+			<li class="p-2 flex flex-col items-center">
+				<div class="card bg-base-100 shadow-sm">
+					<figure class="pt-4">
+						<img src={ "/barcode?t=" + barcodeType + "&d=" + barcode } width={width} height={height} />
+					</figure>
+					<div class="card-body p-4 items-center text-center">
+						<h2 class="card-title">{ barcode }</h2>
+					</div>
+				</div>
+			</li>
+		}
+	</ul>
+}
