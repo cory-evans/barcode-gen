@@ -7,10 +7,7 @@ import (
 	"strconv"
 
 	"github.com/a-h/templ"
-	"github.com/boombuler/barcode"
-	"github.com/boombuler/barcode/code128"
-	"github.com/boombuler/barcode/datamatrix"
-	"github.com/boombuler/barcode/qr"
+	"github.com/cory-evans/barcode-gen/internal/barcodes"
 	"github.com/cory-evans/barcode-gen/internal/templates"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -37,7 +34,7 @@ func main() {
 	app.Post("/barcode", func(c *fiber.Ctx) error {
 
 		w, h := strconv.FormatInt(barcodeWidth, 10), strconv.FormatInt(barcodeHeight, 10)
-		var barcodes []string
+		var barcodeData []string
 
 		startingNumberStr := c.FormValue("startingNumber")
 		barcodeType := c.FormValue("barcodeType")
@@ -45,15 +42,15 @@ func main() {
 		numberOfBarcodes, err := strconv.Atoi(numberOfBarcodesStr)
 		if err != nil || numberOfBarcodes < 2 {
 			// just do a single barcode
-			barcodes = append(barcodes, startingNumberStr)
+			barcodeData = append(barcodeData, startingNumberStr)
 
-			cmp := templates.Barcode(barcodes, barcodeType, w, h)
+			cmp := templates.Barcode(barcodeData, barcodeType, w, h)
 
 			handler := adaptor.HTTPHandler(templ.Handler(cmp))
 			return handler(c)
 		}
 
-		prefix, startingNumber, nDigits := splitBarcodePrefix(startingNumberStr)
+		prefix, startingNumber, nDigits := barcodes.SplitBarcodePrefix(startingNumberStr)
 
 		// generate 10 barcodes starting from the number
 		for i := 0; i < numberOfBarcodes; i++ {
@@ -62,10 +59,10 @@ func main() {
 				bc = "0" + bc
 			}
 
-			barcodes = append(barcodes, prefix+bc)
+			barcodeData = append(barcodeData, prefix+bc)
 		}
 
-		cmp := templates.Barcode(barcodes, barcodeType, w, h)
+		cmp := templates.Barcode(barcodeData, barcodeType, w, h)
 
 		handler := adaptor.HTTPHandler(templ.Handler(cmp))
 		return handler(c)
@@ -76,46 +73,16 @@ func main() {
 		data := c.Query("d")
 		barcodeType := c.Query("t")
 
-		var bc barcode.Barcode
-		var err error
+		bc, err := barcodes.Generate(barcodeType, data, barcodeWidth, barcodeHeight)
 
-		switch barcodeType {
-		case "Code128":
-			bc, err = code128.Encode(data)
-		case "Datamatrix":
-			bc, err = datamatrix.Encode(data)
-		case "QR":
-			bc, err = qr.Encode(data, qr.M, qr.Auto)
-
-		}
-
-		if err != nil {
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
-
-		scaledBC, err := barcode.Scale(bc, barcodeWidth, barcodeHeight)
 		if err != nil {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
 		c.Set(fiber.HeaderContentType, "image/png")
 
-		return png.Encode(c.Response().BodyWriter(), scaledBC)
+		return png.Encode(c.Response().BodyWriter(), bc)
 	})
 
 	log.Fatalln(app.Listen(":" + strconv.Itoa(*port)))
-}
-
-func splitBarcodePrefix(data string) (prefix string, number int, nDigits int) {
-
-	for i, r := range data {
-		if r >= '0' && r <= '9' {
-			prefix = data[:i]
-			number, _ = strconv.Atoi(data[i:])
-			nDigits = len(data[i:])
-			break
-		}
-	}
-
-	return
 }
