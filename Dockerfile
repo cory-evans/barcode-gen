@@ -16,6 +16,8 @@ FROM golang:1.23-alpine3.21 as builder
 
 WORKDIR /app
 
+RUN go install github.com/a-h/templ/cmd/templ@v0.3.819
+
 COPY go.mod .
 COPY go.sum .
 
@@ -23,7 +25,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /app/main cmd/api/main.go
+RUN templ generate && go build -o /app/main cmd/api/main.go
 
 FROM alpine:3.21
 

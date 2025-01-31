@@ -20,6 +20,8 @@ func TestSplitBarcodePrefix(t *testing.T) {
 		{"ABC1234", "ABC", 1234, 4},
 		{"ABC00A00", "ABC00A", 0, 2},
 		{"ABC00A12", "ABC00A", 12, 2},
+		{"0000", "", 0, 4},
+		{"ABC", "ABC", 0, 0},
 	}
 
 	for _, test := range tests {

@@ -1,0 +1,51 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  image_name: ghcr.io/cory-evans/barcode-gen
+  image_tag: latest
+
+tasks:
+  default:
+    cmds:
+      - air
+
+  build:
+    deps: [templ, styles]
+    cmds:
+      - go build -o tmp/main.exe cmd/api/main.go
+
+  run:
+    deps: [build]
+    cmds:
+      - tmp/main.exe -port 3000
+
+  templ:
+    cmds:
+      - templ generate
+    sources:
+      - "**/*.templ"
+    generates:
+      - "**/*_templ.go"
+
+  styles:
+    cmds:
+      - npm run build
+    sources:
+      - styles.css
+      - "**/*.templ"
+    generates:
+      - assets/styles.css
+
+  build-image:
+    cmds:
+      - docker build -t {{.image_name}}:{{.image_tag}} .
+
+  push-image:
+    cmds:
+      - docker push {{.image_name}}:{{.image_tag}}
+
+  build-and-push-image:
+    - task: build-image
+    - task: push-image

@@ -1,5 +1,6 @@
 node_modules/
 tmp/
+.task/
 
 # currently, styles.css is generated and htmx.min.js is downloaded from a CDN
 assets/

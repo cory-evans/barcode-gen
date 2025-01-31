@@ -20,7 +20,13 @@ func SplitBarcodePrefix(data string) (string, int, int) {
 
 	// enumerate the string backwards to find the first non-numeric character
 	for i := dataLength - 1; i >= 0; i-- {
-		if data[i] < '0' || data[i] > '9' {
+		if i == 0 && isDigit(data[i]) {
+			number, _ := strconv.Atoi(data)
+
+			return "", number, dataLength
+		}
+		
+		if !isDigit(data[i]) {
 			nDigits = dataLength - i - 1
 
 			prefix = data[:dataLength-nDigits]
@@ -32,6 +38,11 @@ func SplitBarcodePrefix(data string) (string, int, int) {
 
 	return prefix, number, nDigits
 }
+
+func isDigit(c byte) bool {
+	return c >= '0' && c <= '9'
+}
+
 
 func Generate(barcodeType string, data string, width, height int) (barcode.Barcode, error) {
 	var bc barcode.Barcode
