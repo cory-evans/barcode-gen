@@ -8,6 +8,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/cory-evans/barcode-gen/internal/barcodes"
+	"github.com/cory-evans/barcode-gen/internal/components"
 	"github.com/cory-evans/barcode-gen/internal/templates"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -26,6 +27,14 @@ func main() {
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		cmp := templates.Home()
+
+		handler := adaptor.HTTPHandler(templ.Handler(cmp))
+		return handler(c)
+	})
+	app.Get("/form", func(c *fiber.Ctx) error {
+
+		idstr := c.QueryInt("id", 0)
+		cmp := components.BarcodeForm(idstr)
 
 		handler := adaptor.HTTPHandler(templ.Handler(cmp))
 		return handler(c)

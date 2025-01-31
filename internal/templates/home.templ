@@ -8,27 +8,7 @@ templ Home() {
 		@DocumentHead("Barcode Generator")	
 		<body class="bg-base-200 text-base-content min-h-screen p-4">
 			<main>
-				<form hx-post="/barcode" hx-target="#output">
-					<div class="flex space-x-2">
-						@components.InputField("startingNumber", "Starting Barcode", "text")
-						@components.InputField("numberOfBarcodes", "Number of Barcodes", "number")
-
-						<fieldset class="fieldset w-48">
-							<legend class="fieldset-legend">Barcode Type</legend>
-							<select name="barcodeType" class="select">
-								<option value="Code128" selected>Code 128</option>
-								<option value="Datamatrix">Datamatrix</option>
-								<option value="QR">QR Code</option>
-							</select>
-						</fieldset>
-
-						<div class="flex items-end pb-1">
-							<button type="submit" class="btn btn-primary">Generate</button>
-						</div>
-					</div>
-				</form>
-
-				<div id="output"></div>
+				@components.BarcodeForm(0)
 			</main>
 		</body>
 	</html>

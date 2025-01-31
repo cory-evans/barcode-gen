@@ -1,0 +1,31 @@
+package components
+
+import "strconv"
+import "github.com/cory-evans/barcode-gen/internal/util"
+
+
+templ BarcodeForm(idInt int) {
+	{{ id := strconv.Itoa(idInt) }}
+	<form hx-post="/barcode" hx-target={"#output" + id}>
+		<div class="flex space-x-2">
+			@InputField("startingNumber", "Starting Barcode", "text")
+			@InputField("numberOfBarcodes", "Number of Barcodes", "number")
+
+			<div class="flex flex-col">
+				{{ sid := util.RandomHtmlElementID() }}
+				<label class="text-sm" for={ id }>Barcode Type</label>
+				<select name="barcodeType" class="select" id={ sid }>
+					<option value="Code128" selected>Code 128</option>
+					<option value="Datamatrix">Datamatrix</option>
+					<option value="QR">QR Code</option>
+				</select>
+			</div>
+
+			<div class="flex items-end">
+				<button type="submit" class="btn btn-primary">Generate</button>
+			</div>
+		</div>
+	</form>
+
+	<div id={"output" + id}></div>
+}
