@@ -5,7 +5,8 @@ tmp/
 *.exe
 
 # currently, styles.css is generated and htmx.min.js is downloaded from a CDN
-assets/
+assets/*
+!assets/favicon.svg
 
 # These are generated files
 *_templ.go
