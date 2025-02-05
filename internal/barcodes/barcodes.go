@@ -25,7 +25,7 @@ func SplitBarcodePrefix(data string) (string, int, int) {
 
 			return "", number, dataLength
 		}
-		
+
 		if !isDigit(data[i]) {
 			nDigits = dataLength - i - 1
 
@@ -43,17 +43,16 @@ func isDigit(c byte) bool {
 	return c >= '0' && c <= '9'
 }
 
-
 func Generate(barcodeType string, data string, width, height int) (barcode.Barcode, error) {
 	var bc barcode.Barcode
 	var err error
 
 	switch barcodeType {
-	case "Code128":
+	case "code128":
 		bc, err = code128.Encode(data)
-	case "Datamatrix":
+	case "datamatrix":
 		bc, err = datamatrix.Encode(data)
-	case "QR":
+	case "qr":
 		bc, err = qr.Encode(data, qr.M, qr.Auto)
 	}
 

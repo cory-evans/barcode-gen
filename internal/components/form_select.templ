@@ -1,0 +1,20 @@
+package components
+
+import "github.com/cory-evans/barcode-gen/internal/util"
+
+type FormSelectOption struct {
+	Value string
+	Label string
+}
+
+templ FormSelect(name, label string, options []FormSelectOption, attrs templ.Attributes) {
+	{{ id := util.RandomHtmlElementID() }}
+	<div class="flex flex-col">
+		<label for={ id } class="text-sm">{ label }</label>
+		<select id={ id } name={ name } class="select select-bordered w-full" { attrs... }>
+			for _, item := range options {
+				<option value={ item.Value }>{ item.Label }</option>
+			}
+		</select>
+	</div>
+}

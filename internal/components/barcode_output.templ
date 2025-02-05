@@ -1,0 +1,20 @@
+package components
+
+import "github.com/cory-evans/barcode-gen/internal/models"
+
+templ BarcodeOutput(data []models.BarcodeData) {
+	<ul class="flex flex-wrap">
+		for _, bc := range data {
+			<li class="p-2 flex flex-col items-center">
+				<div class="card bg-base-100">
+					<figure class="not-print:pt-4">
+						<img src={ "/barcode" + bc.URLParams() } width={ bc.Width } height={ bc.Height }/>
+					</figure>
+					<div class="card-body p-2 pt-1 items-center text-center print:p-1">
+						<h2 class="card-title">{ bc.Data }</h2>
+					</div>
+				</div>
+			</li>
+		}
+	</ul>
+}

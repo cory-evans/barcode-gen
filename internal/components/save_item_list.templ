@@ -1,0 +1,24 @@
+package components
+
+import "github.com/cory-evans/barcode-gen/internal/models"
+
+templ SavedItemList(data []models.GenerateInput) {
+	<ul class="flex flex-col">
+		for _, item := range data {
+			<li class="p-1 flex flex-row space-x-2 hover:bg-gray-300 rounded-sm hover:shadow-sm">
+				<div class="flex grow items-center overflow-hidden">
+					<span class="text-md overflow-ellipsis overflow-hidden whitespace-nowrap">{ item.SaveName }</span>
+				</div>
+				<div class="flex flex-row space-x-1">
+					<button
+						class="w-18 btn btn-sm btn-error"
+						hx-delete={ "/saved/delete?save_name=" + item.SaveName }
+						hx-target="#search-results"
+						hx-confirm={ "Are you sure you want to delete '" + item.SaveName + "'?" }
+					>Delete</button>
+					<button class="w-32 btn btn-sm btn-primary" hx-post={ "/load?save_name=" + item.SaveName } hx-target="#output">Load</button>
+				</div>
+			</li>
+		}
+	</ul>
+}

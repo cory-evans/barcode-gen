@@ -30,10 +30,18 @@ RUN templ generate && go build -o /app/main cmd/api/main.go
 FROM alpine:3.21
 
 EXPOSE 80
+VOLUME [ "/data" ]
+
 WORKDIR /app
 
-COPY --from=builder /app/main /app/main
-COPY assets assets
+RUN mkdir -p /app/assets /data
+RUN \
+	wget -O /app/assets/htmx.min.js https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js \
+	&& wget -O /app/assets/see.js https://unpkg.com/htmx-ext-sse@2.2.2/sse.js \
+	&& wget -O /app/assets/alpine.js https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js
+
 COPY --from=nodeBuilder /app/assets/styles.css assets/styles.css
 
-CMD ["/app/main", "-port", "80"]
+COPY --from=builder /app/main /app/main
+
+CMD ["/app/main", "-port", "80", "-itemsJsonPath", "/data/items.json"]

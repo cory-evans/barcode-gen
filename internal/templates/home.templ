@@ -1,15 +1,30 @@
 package templates
 
-import "github.com/cory-evans/barcode-gen/internal/components"
+import (
+	"github.com/cory-evans/barcode-gen/internal/components"
+	"github.com/cory-evans/barcode-gen/internal/models"
+)
 
 templ Home() {
-
 	<html lang="en" data-theme="corporate">
-		@DocumentHead("Barcode Generator")	
-		<body class="bg-base-200 text-base-content min-h-screen p-4">
-			<main>
-				@components.BarcodeForm(0)
-			</main>
+		@DocumentHead("Barcode Generator")
+		<body class="text-base-content min-h-screen">
+			<div class="not-print:flex not-print:h-full">
+				<div class="not-print:h-screen flex flex-col grow-0 shrink-0 basis-[500px] bg-base-200 p-2 print:hidden">
+					@components.BarcodeForm(components.NewBarcodeFormProps(models.NewBlankGenerateInput()))
+					<div class="divider"></div>
+					<div>
+						@components.InputField("search", "", "text", "", templ.Attributes{
+							"hx-get":      "/saved/search",
+							"hx-target":   "#search-results",
+							"hx-trigger":  "keyup changed delay:50ms, refresh_saved from:window",
+							"placeholder": "Search for saved items...",
+						})
+					</div>
+					<div id="search-results" hx-get="/saved/list" hx-trigger="load once" class="mt-2 px-2 overflow-y-scroll"></div>
+				</div>
+				<div id="output" class="not-print:grow not-print:overflow-y-scroll"></div>
+			</div>
 		</body>
 	</html>
 }

@@ -1,31 +1,79 @@
 package components
 
-import "strconv"
-import "github.com/cory-evans/barcode-gen/internal/util"
+import (
+	"fmt"
+	"github.com/cory-evans/barcode-gen/internal/models"
+	"github.com/cory-evans/barcode-gen/pkg/array"
+	"github.com/cory-evans/barcode-gen/pkg/text"
+)
 
+type BarcodeFormProps struct {
+	GenerateTypes []FormSelectOption
+	BarcodeTypes  []FormSelectOption
+	FormInput     models.GenerateInput
 
-templ BarcodeForm(idInt int) {
-	{{ id := strconv.Itoa(idInt) }}
-	<form hx-post="/barcode" hx-target={"#output" + id}>
-		<div class="flex space-x-2">
-			@InputField("startingNumber", "Starting Barcode", "text")
-			@InputField("numberOfBarcodes", "Number of Barcodes", "number")
+	outOfbandSwap bool
+}
 
-			<div class="flex flex-col">
-				{{ sid := util.RandomHtmlElementID() }}
-				<label class="text-sm" for={ id }>Barcode Type</label>
-				<select name="barcodeType" class="select" id={ sid }>
-					<option value="Code128" selected>Code 128</option>
-					<option value="Datamatrix">Datamatrix</option>
-					<option value="QR">QR Code</option>
-				</select>
-			</div>
+func NewBarcodeFormProps(formInput models.GenerateInput) BarcodeFormProps {
+	options := array.Map(models.GenerationTypes, func(item string) FormSelectOption {
+		return FormSelectOption{Value: item, Label: text.PascalCase(item)}
+	})
 
-			<div class="flex items-end">
-				<button type="submit" class="btn btn-primary">Generate</button>
+	return BarcodeFormProps{
+		GenerateTypes: options,
+		BarcodeTypes: []FormSelectOption{
+			{Value: "code128", Label: "Code 128"},
+			{Value: "datamatrix", Label: "Datamatrix"},
+			{Value: "qr", Label: "QR"},
+		},
+		FormInput:     formInput,
+		outOfbandSwap: false,
+	}
+}
+
+func (p *BarcodeFormProps) formXData() string {
+	return fmt.Sprintf("{ gt: '%s', bt: '%s' }", p.FormInput.GenerateType, p.FormInput.BarcodeType)
+}
+
+templ BarcodeForm(props BarcodeFormProps) {
+	<form
+		id="BarcodeForm"
+		x-data={ props.formXData() }
+		class="flex flex-col space-y-2 min-h-[420px]"
+		hx-post="/generate"
+		hx-target="#output"
+		if props.outOfbandSwap {
+			hx-swap-oob="true"
+		}
+	>
+		<div class="grid grid-cols-2 gap-2">
+			@FormSelect("generate_type", "Generate Type", props.GenerateTypes, templ.Attributes{"x-model": "gt"})
+			@FormSelect("barcode_type", "Barcode Type", props.BarcodeTypes, templ.Attributes{"x-model": "bt"})
+		</div>
+		<div class="grid grid-cols-2 gap-2">
+			@InputField("width", "Width (pixels)", "number", props.FormInput.WidthAsStr(), nil)
+			@InputField("height", "Height (pixels)", "number", props.FormInput.HeightAsStr(), nil)
+		</div>
+		<div x-show="gt == 'Sequence'" class="grid grid-cols-2 gap-2">
+			@InputField("prefix", "Prefix", "number", props.FormInput.Prefix, nil)
+			@InputField("suffix", "Suffix", "number", props.FormInput.Suffix, nil)
+		</div>
+		<div x-show="gt == 'Sequence'" class="grid grid-cols-2 gap-2">
+			@InputField("start", "Start", "number", props.FormInput.StartAsStr(), nil)
+			@InputField("number", "Number of Barcodes", "number", props.FormInput.NumberAsStr(), nil)
+		</div>
+		<div x-show="gt == 'OnePerLine'" class="grid grid-cols-1">
+			@FormTextarea("barcode_data", "Data", props.FormInput.BarcodeData, templ.Attributes{"rows": "5"})
+		</div>
+		<div class="grid grid-cols-2 gap-2 mt-4">
+			<button type="submit" class="btn btn-primary col-start-2" name="action" value="generate">Generate</button>
+		</div>
+		<div class="grid grid-cols-2 gap-2">
+			@InputField("save_name", "Save as", "text", props.FormInput.SaveName, nil)
+			<div class="flex flex-col justify-end">
+				<button class="btn btn-success" type="submit" name="action" value="save">Save</button>
 			</div>
 		</div>
 	</form>
-
-	<div id={"output" + id}></div>
 }

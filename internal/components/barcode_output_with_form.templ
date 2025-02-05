@@ -1,0 +1,9 @@
+package components
+
+import "github.com/cory-evans/barcode-gen/internal/models"
+
+templ BarcodeOutputWithForm(props BarcodeFormProps, data []models.BarcodeData) {
+	{{ props.outOfbandSwap = true }}
+	@BarcodeForm(props)
+	@BarcodeOutput(data)
+}
