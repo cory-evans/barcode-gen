@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	b64 "encoding/base64"
+
 	"github.com/cory-evans/barcode-gen/internal/util"
 	"github.com/gofiber/fiber/v2"
 )
@@ -90,5 +92,18 @@ type BarcodeData struct {
 }
 
 func (bc *BarcodeData) URLParams() string {
-	return "?d=" + bc.Data + "&t=" + bc.Type + "&w=" + bc.Width + "&h=" + bc.Height
+	return "?d=" + bc.DataAsB64() + "&t=" + bc.Type + "&w=" + bc.Width + "&h=" + bc.Height
+}
+
+func (bc *BarcodeData) DataAsB64() string {
+	return b64.URLEncoding.EncodeToString([]byte(bc.Data))
+}
+
+func DecodeBarcodeData(data string) (string, error) {
+	decodedData, err := b64.URLEncoding.DecodeString(data)
+	if err != nil {
+		return "", err
+	}
+
+	return string(decodedData), nil
 }

@@ -1,6 +1,7 @@
 package barcodes
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/boombuler/barcode"
@@ -58,6 +59,10 @@ func Generate(barcodeType string, data string, width, height int) (barcode.Barco
 
 	if err != nil {
 		return nil, err
+	}
+
+	if bc == nil {
+		return nil, errors.New("barcode type not found")
 	}
 
 	scaledBC, err := barcode.Scale(bc, width, height)

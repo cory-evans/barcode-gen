@@ -84,8 +84,18 @@ func LoadOutputHTML(c *fiber.Ctx) error {
 
 func GenerateBarcodeImage(c *fiber.Ctx) error {
 
-	data := c.Query("d")
+	dataAsB64 := c.Query("d")
 	barcodeType := c.Query("t")
+
+	if dataAsB64 == "" || barcodeType == "" {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	data, err := models.DecodeBarcodeData(dataAsB64)
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
 	w, h := util.FormValueAsInt(c, "w"), util.FormValueAsInt(c, "h")
 
 	bc, err := barcodes.Generate(barcodeType, data, w, h)
